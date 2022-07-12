@@ -1,6 +1,6 @@
 import os
-from flask import Flask, render_template, abort, redirect, request
-import stripe
+from flask import Flask, render_template, abort, redirect, request, jsonify
+import stripe, json
 
 app = Flask(__name__)
 stripe.api_key = "sk_test_51LKMv5J3ofAqn0Rk13O8Zkja2jvjVCeO1w6dLoN8tC8gi8SFcyY0WY6PeujJqmpVibmqWDMpoYqvNoBYZCftci5J00OgVmlQhq"
@@ -61,27 +61,50 @@ def cancel():
     return render_template('cancel.html')
 
 
-@app.route('/event', methods=['POST'])
-def new_event():
+# app.py
+#
+# Use this sample code to handle webhook events in your integration.
+#
+# 1) Paste this code into a new file (app.py)
+#
+# 2) Install dependencies
+#   pip3 install flask
+#   pip3 install stripe
+#
+# 3) Run the server on http://localhost:4242
+#   python3 -m flask run --port=4242
+
+
+endpoint_secret = 'whsec_Kaj3M5lCu59OmwIjDPS4x4ffS7y6aL6h'
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
     event = None
     payload = request.data
-    signature = request.headers['STRIPE_SIGNATURE']
+    sig_header = request.headers['STRIPE_SIGNATURE']
 
     try:
         event = stripe.Webhook.construct_event(
-            payload, signature, stripe.api_key)
-    except Exception as e:
-        # the payload could not be verified
-        abort(400)
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        raise e
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        raise e
 
-
+    # Handle the event
     if event['type'] == 'checkout.session.completed':
         global completed_order_id
         completed_order_id = event['data']['object']['id']
+    # ... handle other event types
     else:
         print('Unhandled event type {}'.format(event['type']))
 
-    return {'success': True}
+    return jsonify(success=True)
+        
+   
 
 
 if __name__ == "__main__":
