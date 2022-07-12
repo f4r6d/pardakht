@@ -74,15 +74,12 @@ def new_event():
         # the payload could not be verified
         abort(400)
 
-    if event['type'] == 'checkout.session.completed':
-      session = stripe.checkout.Session.retrieve(
-          event['data']['object'].id, expand=['line_items'])
-      print(f'Sale to {session.customer_details.email}:')
-      global completed_order_id
-      completed_order_id = session.customer_details.email
-      for item in session.line_items.data:
-          print(f'  - {item.quantity} {item.description} '
-                f'${item.amount_total/100:.02f} {item.currency.upper()}')
+
+    if event['type'] == 'payment_intent.succeeded':
+        global completed_order_id
+        completed_order_id = event['data']['object']['id']
+    else:
+        print('Unhandled event type {}'.format(event['type']))
 
     return {'success': True}
 
