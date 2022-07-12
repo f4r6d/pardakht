@@ -75,7 +75,7 @@ def new_event():
         abort(400)
 
 
-    if event['type'] == 'payment_intent.succeeded':
+    if event['type'] == 'checkout.session.completed':
         global completed_order_id
         completed_order_id = event['data']['object']['id']
     else:
