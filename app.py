@@ -3,8 +3,10 @@ from flask import Flask, render_template, abort, redirect, request, jsonify
 import stripe, json
 
 app = Flask(__name__)
-stripe.api_key = "sk_test_51LKMv5J3ofAqn0Rk13O8Zkja2jvjVCeO1w6dLoN8tC8gi8SFcyY0WY6PeujJqmpVibmqWDMpoYqvNoBYZCftci5J00OgVmlQhq"
 
+stripe.api_key = os.environ.get('secret_key')
+endpoint_secret = os.environ.get('endpoint_secret')
+products = None
 completed_order_id = None
 
 def get_products():
@@ -16,7 +18,6 @@ def get_products():
     
     return tmp_products
 
-products = get_products()
 
 @app.route('/')
 def index():
@@ -61,22 +62,6 @@ def cancel():
     return render_template('cancel.html')
 
 
-# app.py
-#
-# Use this sample code to handle webhook events in your integration.
-#
-# 1) Paste this code into a new file (app.py)
-#
-# 2) Install dependencies
-#   pip3 install flask
-#   pip3 install stripe
-#
-# 3) Run the server on http://localhost:4242
-#   python3 -m flask run --port=4242
-
-
-endpoint_secret = 'whsec_Kaj3M5lCu59OmwIjDPS4x4ffS7y6aL6h'
-
 @app.route('/webhook', methods=['POST'])
 def webhook():
     event = None
@@ -105,7 +90,5 @@ def webhook():
     return jsonify(success=True)
         
    
-
-
 if __name__ == "__main__":
     app.run()
