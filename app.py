@@ -10,9 +10,10 @@ completed_order_id = None
 mongo_password = os.environ.get('mongo_password')
 
 def add_to_mongo(data):
-    client = pymongo.MongoClient(f"mongodb+srv://farshid:{mongo_password}@sells.ado03.mongodb.net/?retryWrites=true&w=majority")
-    db = client.test
-    ids = db.ids
+    cluster = f'mongodb://farshid:{mongo_password}@sells-shard-00-00.ado03.mongodb.net:27017,sells-shard-00-01.ado03.mongodb.net:27017,sells-shard-00-02.ado03.mongodb.net:27017/?ssl=true&replicaSet=atlas-4l7f20-shard-0&authSource=admin&retryWrites=true&w=majority'
+    client = pymongo.MongoClient(cluster)
+    db = client['orders']
+    ids = db['ids']
     result = ids.insert_one(data)
 
 
