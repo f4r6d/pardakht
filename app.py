@@ -14,7 +14,7 @@ def add_to_mongo(data):
     client = pymongo.MongoClient(cluster)
     db = client['orders']
     ids = db['ids']
-    result = ids.insert_one(data)
+    ids.insert_one(data)
 
 
 def get_products():
