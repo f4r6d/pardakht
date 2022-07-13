@@ -4,3 +4,4 @@ requests
 gunicorn
 psycopg2
 stripe
+pymongo

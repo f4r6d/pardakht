@@ -1,6 +1,5 @@
-import os
-from flask import Flask, render_template, abort, redirect, request, jsonify
-import stripe, json
+import os, stripe, pymongo
+from flask import Flask, render_template, abort, redirect, request, jsonify 
 
 app = Flask(__name__)
 
@@ -8,6 +7,14 @@ stripe.api_key = os.environ.get('secret_key')
 endpoint_secret = os.environ.get('endpoint_secret')
 products = None
 completed_order_id = None
+mongo_password = os.environ.get('mongo_password')
+
+def add_to_mongo(data):
+    client = pymongo.MongoClient(f"mongodb+srv://farshid:{mongo_password}@sells.ado03.mongodb.net/?retryWrites=true&w=majority")
+    db = client.test
+    ids = db.ids
+    result = ids.insert_one(data)
+
 
 def get_products():
     tmp_products = dict()
@@ -83,6 +90,11 @@ def webhook():
     if event['type'] == 'checkout.session.completed':
         global completed_order_id
         completed_order_id = event['data']['object']['id']
+        try:
+            data = {"Order_ID": completed_order_id}
+            add_to_mongo(data)
+        except:
+            return "MONGO ERR"
     # ... handle other event types
     else:
         print('Unhandled event type {}'.format(event['type']))
