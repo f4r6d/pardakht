@@ -94,7 +94,7 @@ def webhook():
             data = {"Order_ID": completed_order_id}
             add_to_mongo(data)
         except:
-            return "MONGO ERR"
+            return "MONGO ERR", data
     # ... handle other event types
     else:
         print('Unhandled event type {}'.format(event['type']))
